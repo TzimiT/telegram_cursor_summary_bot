@@ -1,0 +1,21 @@
+services:
+  - type: worker
+    name: news-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python get_users.py
+    envVars:
+      - key: API_ID
+        sync: false
+      - key: API_HASH
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: FOLDER_NAME
+        value: GPT
+      - key: SUBSCRIBERS_FILE
+        value: subscribers.json
+      - key: DEBUG_MODE
+        value: "False"

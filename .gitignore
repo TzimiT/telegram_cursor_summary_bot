@@ -18,7 +18,16 @@ env/
 
 # Логи, временные файлы
 *.log
+*.log.*
+users.log*
+bot.log*
+sent_messages.log*
 *.sqlite3
+
+# Файлы подписчиков (PII)
+subscribers_old.json
+subscribers*.json
+subscribers*.txt
 
 # IDE/редактор файлы (VSCode, PyCharm и т.п.)
 .vscode/

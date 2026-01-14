@@ -17,6 +17,23 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+def _load_json(path: str, default):
+    if not os.path.exists(path):
+        return default
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        logging.warning(f"[WARN] Ошибка чтения {path}: {e}")
+        return default
+
+def _save_json(path: str, data):
+    try:
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logging.error(f"[ERROR] Ошибка записи {path}: {e}")
+
 def load_subscribers():
     if not os.path.exists(SUBSCRIBERS_FILE):
         logger.warning("[WARN] Файл с подписчиками не найден, список пуст")
@@ -31,7 +48,7 @@ def load_subscribers():
 
 def save_subscriber(user: Update.effective_user):
     subscribers = load_subscribers()
-    user_ids = {sub['user_id'] for sub in subscribers}
+    user_ids = {sub['user_id'] for sub in subscribers if 'user_id' in sub}
     if user.id not in user_ids:
         subscriber = {
             "user_id": user.id,
@@ -49,7 +66,7 @@ def save_subscriber(user: Update.effective_user):
 
 def remove_subscriber(user_id):
     subscribers = load_subscribers()
-    new_subs = [sub for sub in subscribers if sub['user_id'] != user_id]
+    new_subs = [sub for sub in subscribers if 'user_id' in sub and sub['user_id'] != user_id]
     with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
         json.dump({"subscribers": new_subs}, f, ensure_ascii=False, indent=2)
     logger.info(f"Пользователь {user_id} удалён из подписчиков.")
@@ -132,7 +149,7 @@ async def channels_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     subscribers = load_subscribers()
-    is_subscribed = any(sub['user_id'] == user.id for sub in subscribers)
+    is_subscribed = any('user_id' in sub and sub['user_id'] == user.id for sub in subscribers)
     if is_subscribed:
         await update.message.reply_text("Ты подписан на рассылку ✅")
     else:
