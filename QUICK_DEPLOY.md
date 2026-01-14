@@ -16,8 +16,8 @@
 В настройках проекта (Settings → Variables) добавьте:
 
 ```
-API_ID=27670458
-API_HASH=bca98f3c9d65605229aba88f8072deaf
+API_ID=YOUR_API_ID
+API_HASH=YOUR_API_HASH
 TELEGRAM_BOT_TOKEN=ваш_токен_бота
 OPENAI_API_KEY=ваш_ключ_openai
 FOLDER_NAME=GPT

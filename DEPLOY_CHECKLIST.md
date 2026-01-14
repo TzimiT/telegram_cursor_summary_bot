@@ -51,7 +51,7 @@ railway link
 railway logs
 
 # Добавить переменную окружения
-railway variables set API_ID=27670458
+railway variables set API_ID=YOUR_API_ID
 ```
 
 ## ⚠️ Важные моменты

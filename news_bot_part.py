@@ -32,15 +32,36 @@ def get_yesterday_range():
     end = datetime.combine(today, datetime.min.time(), tzinfo=timezone.utc)
     return start, end
 
-def summarize_news(news_list):
+def get_week_range():
+    """Возвращает диапазон дат за последние 7 дней (включая сегодня)"""
+    today = datetime.now(timezone.utc).date()
+    start = datetime.combine(today - timedelta(days=7), datetime.min.time(), tzinfo=timezone.utc)
+    end = datetime.combine(today, datetime.min.time(), tzinfo=timezone.utc)
+    return start, end
+
+def summarize_news(news_list, period='day'):
+    """
+    Суммаризирует новости за указанный период.
+    
+    Args:
+        news_list: список новостей для суммаризации
+        period: 'day' для дня или 'week' для недели
+    """
     text = "\n\n".join(news_list)
-    # Добавляем дату периода в промпт (вчера, UTC)
-    start, _ = get_yesterday_range()
-    date_str = start.strftime("%Y-%m-%d")
+    
+    # Определяем диапазон дат в зависимости от периода
+    if period == 'week':
+        start, end = get_week_range()
+        date_str = f"{start.strftime('%Y-%m-%d')} - {end.strftime('%Y-%m-%d')}"
+        period_text = "неделю"
+    else:
+        start, end = get_yesterday_range()
+        date_str = start.strftime("%Y-%m-%d")
+        period_text = "день"
 
     prompt_system = (
         f"""
-Ты — профессиональный редактор новостной рассылки. Составь лаконичную, структурированную сводку новостей за {date_str} (UTC) из предоставленных фрагментов.
+Ты — профессиональный редактор новостной рассылки. Составь лаконичную, структурированную сводку новостей за {period_text} ({date_str}, UTC) из предоставленных фрагментов.
 
 ## ОСНОВНЫЕ ТРЕБОВАНИЯ
 
@@ -122,10 +143,24 @@ AI/ML
     )
     return response.choices[0].message.content.strip()
 
-async def get_news(client, channels):
+async def get_news(client, channels, period='day'):
+    """
+    Собирает новости из каналов за указанный период.
+    
+    Args:
+        client: Telethon клиент
+        channels: список каналов
+        period: 'day' для дня или 'week' для недели
+    """
     all_news = []
-    start, end = get_yesterday_range()
-    print(f"[DEBUG] Диапазон фильтра: {start} ... {end}")
+    if period == 'week':
+        start, end = get_week_range()
+        period_name = "неделю"
+    else:
+        start, end = get_yesterday_range()
+        period_name = "день"
+    
+    print(f"[DEBUG] Диапазон фильтра за {period_name}: {start} ... {end}")
     for channel_info in channels:
         username = channel_info.get("username")
         if not username:

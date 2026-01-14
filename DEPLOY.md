@@ -189,8 +189,8 @@ Telethon создает файл `anon_news.session` при первом зап�
 ```python
 import os
 
-api_id = int(os.getenv('API_ID', '27670458'))
-api_hash = os.getenv('API_HASH', 'bca98f3c9d65605229aba88f8072deaf')
+api_id = int(os.getenv('API_ID', 'YOUR_API_ID'))
+api_hash = os.getenv('API_HASH', 'YOUR_API_HASH')
 # и т.д.
 ```
 

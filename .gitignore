@@ -28,6 +28,8 @@ sent_messages.log*
 subscribers_old.json
 subscribers*.json
 subscribers*.txt
+subscribers*.bak
+*.bak
 
 # IDE/редактор файлы (VSCode, PyCharm и т.п.)
 .vscode/

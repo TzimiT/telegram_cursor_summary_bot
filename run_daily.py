@@ -104,16 +104,20 @@ async def run_pipeline(args):
                 await get_channels_fullinfo_from_folder(client, config.FOLDER_NAME)
             channels = load_channels_from_json()
             if args.news or args.send:
+                # Определяем период: неделя или день
+                period = 'week' if args.weekly else 'day'
+                period_name = "неделю" if args.weekly else "вчера"
+                
                 print(f"[LOG] Каналы для агрегации: {[ch.get('username','?') for ch in channels]}")
-                news = await get_news(client, channels)
-                print(f"[LOG] Найдено новостей за вчера: {len(news)}")
+                news = await get_news(client, channels, period=period)
+                print(f"[LOG] Найдено новостей за {period_name}: {len(news)}")
                 if args.news and not args.send:
                     # Только сбор новостей
                     return
                 if not news:
-                    print("[LOG] Нет новостей за вчера — рассылка пропущена")
+                    print(f"[LOG] Нет новостей за {period_name} — рассылка пропущена")
                     return
-                summary = summarize_news(news)
+                summary = summarize_news(news, period=period)
 
                 if args.summary_only:
                     out = args.summary_only if isinstance(args.summary_only, str) else 'summary.txt'
@@ -144,6 +148,7 @@ def build_arg_parser():
     p.add_argument('--verify', action='store_true', help='Проверить доступность подписчиков перед рассылкой')
     p.add_argument('--news', action='store_true', help='Только собрать новости (без отправки)')
     p.add_argument('--send', action='store_true', help='Собрать новости, суммаризировать и отправить')
+    p.add_argument('--weekly', action='store_true', help='Собрать саммаризацию за неделю (по умолчанию за день)')
     p.add_argument('--dry-run', action='store_true', help='Не отправлять, только показать превью')
     p.add_argument('--summary-only', nargs='?', const=True, help='Сохранить сводку в файл (по умолчанию summary.txt) и завершить')
     return p
