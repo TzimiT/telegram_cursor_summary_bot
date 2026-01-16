@@ -14,9 +14,15 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 
-SUBSCRIBERS_FILE = ROOT_DIR / "subscribers.json"
+import config
+
+DEFAULT_SUBSCRIBERS_FILE = ROOT_DIR / "subscribers.json"
+SUBSCRIBERS_FILE = Path(getattr(config, 'SUBSCRIBERS_FILE', DEFAULT_SUBSCRIBERS_FILE))
+if not SUBSCRIBERS_FILE.is_absolute():
+    SUBSCRIBERS_FILE = ROOT_DIR / SUBSCRIBERS_FILE
 CHANNELS_FILE = ROOT_DIR / "channels.json"
 RECOMMENDATIONS_FILE = ROOT_DIR / "channel_recommendations.txt"
+USER_MESSAGES_LOG_FILE = ROOT_DIR / "user_messages.log"
 RECOMMEND_WAIT_INPUT = 1
 
 logging.basicConfig(
@@ -44,6 +50,21 @@ def _save_json(path: Path, data):
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as e:
         logging.error(f"[ERROR] Ошибка записи {path}: {e}")
+
+
+def log_user_message(user: Update.effective_user, text: str):
+    try:
+        log_line = (
+            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | "
+            f"user_id: {user.id} | "
+            f"username: @{user.username or '-'} | "
+            f"name: {user.first_name or '-'} {user.last_name or '-'} | "
+            f"text: {text}\n"
+        )
+        with open(USER_MESSAGES_LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(log_line)
+    except Exception as e:
+        logging.error(f"[ERROR] Ошибка записи лога сообщений: {e}")
 
 
 def load_subscribers():
@@ -88,6 +109,7 @@ def remove_subscriber(user_id):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
+    log_user_message(user, "/start")
     was_added = save_subscriber(user)
     await update.message.reply_text(
         "Привет! Ты добавлен в рассылку новостей." if was_added else "Ты уже в списке рассылки."
@@ -95,6 +117,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    log_user_message(user, "/help")
     await update.message.reply_text(
         "Напиши любое сообщение, чтобы подписаться на рассылку.\n"
         "Доступные команды:\n"
@@ -108,6 +132,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
+    log_user_message(user, update.message.text.strip())
     was_added = save_subscriber(user)
     if was_added:
         await update.message.reply_text("Спасибо за сообщение! Ты подписан на рассылку.")
@@ -117,6 +142,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def stop_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
+    log_user_message(user, "/stop")
     remove_subscriber(user.id)
     await update.message.reply_text("Ты отписан от рассылки. Возвращайся, если что!")
 
@@ -124,6 +150,8 @@ async def stop_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # --- Recommend Channel Conversation ---
 
 async def recommend_channel_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    log_user_message(user, "/recommend_channel")
     await update.message.reply_text(
         "Пожалуйста, отправьте ссылку на канал или username (@example), который вы хотите предложить для рассылки. "
         "Можно добавить комментарий."
@@ -134,6 +162,7 @@ async def recommend_channel_start(update: Update, context: ContextTypes.DEFAULT_
 async def recommend_channel_receive(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     text = update.message.text.strip()
+    log_user_message(user, text)
     rec_info = (
         f"date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | "
         f"user_id: {user.id} | username: @{user.username or '-'} | "
@@ -147,12 +176,16 @@ async def recommend_channel_receive(update: Update, context: ContextTypes.DEFAUL
 
 
 async def recommend_channel_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    log_user_message(user, "/cancel")
     await update.message.reply_text("Рекомендация отменена.")
     return ConversationHandler.END
 
 
 # --- /channels: показать список каналов (читает channels.json) ---
 async def channels_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    log_user_message(user, "/channels")
     try:
         data = _load_json(CHANNELS_FILE, {"channels": []})
         channels = data.get("channels", [])
@@ -170,6 +203,7 @@ async def channels_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # --- /status: статус подписки ---
 async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
+    log_user_message(user, "/status")
     subscribers = load_subscribers()
     is_subscribed = any('user_id' in sub and sub['user_id'] == user.id for sub in subscribers)
     if is_subscribed:
@@ -178,10 +212,23 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Ты не подписан на рассылку.")
 
 
-def main():
-    import config  # импортирует telegram_bot_token из твоего конфига
+async def unknown_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    text = update.message.text.strip() if update.message and update.message.text else "/unknown"
+    log_user_message(user, text)
+    await update.message.reply_text("Неизвестная команда. Напиши /help, чтобы увидеть список команд.")
 
-    app = ApplicationBuilder().token(config.telegram_bot_token).build()
+
+def main():
+    token = (config.telegram_bot_token or "").strip()
+    if not token or ":" not in token:
+        logger.error(
+            "Не задан TELEGRAM_BOT_TOKEN. "
+            "Установите переменную окружения TELEGRAM_BOT_TOKEN или добавьте токен в config.py."
+        )
+        sys.exit(1)
+
+    app = ApplicationBuilder().token(token).build()
 
     # Основные команды
     app.add_handler(CommandHandler("start", start))
@@ -189,6 +236,7 @@ def main():
     app.add_handler(CommandHandler("stop", stop_command))
     app.add_handler(CommandHandler("channels", channels_command))
     app.add_handler(CommandHandler("status", status_command))
+    app.add_handler(MessageHandler(filters.COMMAND, unknown_command))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
 
     # Recommend channel

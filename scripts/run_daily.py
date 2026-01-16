@@ -1,6 +1,8 @@
 import argparse
 import asyncio
+import base64
 import json
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -69,6 +71,24 @@ def save_summary_to_log(summary: str):
         print(f"[WARN] Не удалось сохранить саммари в файл: {e}")
 
 
+def _ensure_telethon_session_file():
+    session_path = ROOT_DIR / "anon_news.session"
+    if session_path.exists():
+        return session_path
+
+    session_b64 = os.getenv("TELEGRAM_SESSION_B64") or os.getenv("TELEGRAM_SESSION")
+    if not session_b64:
+        return session_path
+
+    try:
+        session_data = base64.b64decode(session_b64)
+        session_path.write_bytes(session_data)
+        print(f"[LOG] Файл Telethon-сессии восстановлен: {session_path}")
+    except Exception as e:
+        print(f"[WARN] Не удалось восстановить Telethon-сессию из env: {e}")
+    return session_path
+
+
 async def verify_subscribers_delivery(bot: Bot):
     """
     Лёгкая проверка доступности: отправляет chat action (typing) каждому подписчику.
@@ -103,16 +123,25 @@ async def verify_subscribers_delivery(bot: Bot):
 
 async def run_pipeline(args):
     # 1) Создание клиентов
-    bot = Bot(token=config.telegram_bot_token)
+    bot_token = (config.telegram_bot_token or "").strip()
+    if not bot_token:
+        raise RuntimeError(
+            "Не задан TELEGRAM_BOT_TOKEN. Укажи токен бота в .env или переменной окружения."
+        )
+    bot = Bot(token=bot_token)
 
     # 2) Обновление каналов
     channels = None
     if args.channels or args.news or args.send:
-        session_path = ROOT_DIR / "anon_news.session"
+        session_path = _ensure_telethon_session_file()
         if not session_path.exists():
             raise FileNotFoundError(
                 f"Не найдена user-сессия Telethon: {session_path}. "
                 "Положи файл anon_news.session в корень проекта"
+            )
+        if not config.api_id or not str(config.api_hash).strip():
+            raise RuntimeError(
+                "Не заданы API_ID/API_HASH. Укажи их в .env или переменных окружения."
             )
 
         async with TelegramClient(str(session_path), config.api_id, config.api_hash) as client:

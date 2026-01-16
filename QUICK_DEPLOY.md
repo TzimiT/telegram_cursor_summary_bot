@@ -27,12 +27,12 @@ DEBUG_MODE=False
 ### Шаг 4: Загрузка файла сессии
 1. Скопируйте `anon_news.session` с локального компьютера
 2. В Railway: Settings → Variables → Add Variable
-   - Name: `TELEGRAM_SESSION` (или загрузите через Railway CLI)
+   - Name: `TELEGRAM_SESSION_B64` (или `TELEGRAM_SESSION`)
 3. Или используйте Railway CLI для загрузки файла:
    ```bash
    railway login
    railway link
-   railway variables set TELEGRAM_SESSION="$(base64 -i anon_news.session)"
+   railway variables set TELEGRAM_SESSION_B64="$(base64 -i anon_news.session)"
    ```
 
 ### Шаг 5: Настройка ежедневной рассылки
