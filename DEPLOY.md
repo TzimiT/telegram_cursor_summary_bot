@@ -29,7 +29,7 @@
 5. Для ежедневной рассылки настройте Scheduled Task:
    - В настройках проекта → New → Scheduled Task
    - Cron: `0 9 * * *` (каждый день в 09:00 UTC)
-   - Command: `python run_daily.py --send`
+   - Command: `python scripts/run_daily.py --send`
 
 6. Загрузите файл сессии Telethon:
    - Скопируйте `anon_news.session` с локального компьютера
@@ -50,14 +50,14 @@
 2. Создайте новый Web Service:
    - Подключите GitHub репозиторий
    - Build Command: `pip install -r requirements.txt`
-   - Start Command: `python get_users.py`
+   - Start Command: `python scripts/get_users.py`
 
 3. Добавьте переменные окружения (Environment Variables):
    - Те же, что и для Railway
 
 4. Для ежедневной рассылки создайте отдельный Background Worker:
    - New → Background Worker
-   - Start Command: `python run_daily.py --send`
+   - Start Command: `python scripts/run_daily.py --send`
    - Или используйте Cron Job (платная функция)
 
 5. Загрузите `anon_news.session` через SSH или как файл
@@ -78,14 +78,14 @@
    - Подключите GitHub репозиторий
    - Выберите Python
    - Build Command: `pip install -r requirements.txt`
-   - Run Command: `python get_users.py`
+   - Run Command: `python scripts/get_users.py`
 
 3. Добавьте переменные окружения в настройках App
 
 4. Для cron задач используйте Jobs:
    - Create Job
    - Schedule: `0 9 * * *` (каждый день в 09:00)
-   - Command: `python run_daily.py --send`
+   - Command: `python scripts/run_daily.py --send`
 
 **Стоимость:** От $5/месяц
 
@@ -139,7 +139,7 @@
    User=your_username
    WorkingDirectory=/opt/news_bot
    Environment="PATH=/opt/news_bot/venv/bin"
-   ExecStart=/opt/news_bot/venv/bin/python get_users.py
+  ExecStart=/opt/news_bot/venv/bin/python scripts/get_users.py
    Restart=always
    RestartSec=10
 
@@ -161,7 +161,7 @@
    
    Добавьте строку:
    ```
-   0 9 * * * cd /opt/news_bot && /opt/news_bot/venv/bin/python run_daily.py --send >> /opt/news_bot/bot.log 2>&1
+  0 9 * * * cd /opt/news_bot && /opt/news_bot/venv/bin/python scripts/run_daily.py --send >> /opt/news_bot/bot.log 2>&1
    ```
 
 9. Проверьте статус:
@@ -178,7 +178,7 @@
 ### Файл сессии Telethon
 
 Telethon создает файл `anon_news.session` при первом запуске. Этот файл нужно:
-1. Создать локально (запустите `run_daily.py` один раз)
+1. Создать локально (запустите `scripts/run_daily.py` один раз)
 2. Загрузить на сервер/в облако
 3. Сохранить в рабочей директории проекта
 

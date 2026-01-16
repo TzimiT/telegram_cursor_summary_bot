@@ -1,36 +1,43 @@
+import asyncio
+import json
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+import openai
 from telethon import TelegramClient
 from telegram import Bot
 from telegram.error import TelegramError, Forbidden, BadRequest
-import openai
-from config import api_id, api_hash, telegram_bot_token, openai_api_key, FOLDER_NAME, DEBUG_MODE, DEBUG_USER_IDS
-import asyncio
-from datetime import datetime, timedelta, timezone
-import json
-import os
-from get_channels import get_channels_fullinfo_from_folder, load_channels_from_json
 
-SUBSCRIBERS_FILE = "subscribers.json"
-SENT_MESSAGES_LOG = "sent_messages.log"
-SUMMARIES_LOG_FILE = "sent_summaries.log"
+from config import api_id, api_hash, telegram_bot_token, openai_api_key, FOLDER_NAME, DEBUG_MODE, DEBUG_USER_IDS
+from src.get_channels import get_channels_fullinfo_from_folder, load_channels_from_json
+from src.paths import ROOT_DIR
+
+
+SUBSCRIBERS_FILE = ROOT_DIR / "subscribers.json"
+SENT_MESSAGES_LOG = ROOT_DIR / "sent_messages.log"
+SUMMARIES_LOG_FILE = ROOT_DIR / "sent_summaries.log"
 TELEGRAM_MAX_MESSAGE_LENGTH = 4096
 
+
 def load_subscribers():
-    if not os.path.exists(SUBSCRIBERS_FILE):
+    if not SUBSCRIBERS_FILE.exists():
         print("[WARN] Файл с подписчиками не найден, список пуст")
         return []
     try:
         with open(SUBSCRIBERS_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            return [item['user_id'] for item in data.get('subscribers',[]) if 'user_id' in item]
+            return [item['user_id'] for item in data.get('subscribers', []) if 'user_id' in item]
     except Exception as e:
         print(f"[ERROR] Ошибка чтения {SUBSCRIBERS_FILE}: {e}")
         return []
+
 
 def get_yesterday_range():
     today = datetime.now(timezone.utc).date()
     start = datetime.combine(today - timedelta(days=1), datetime.min.time(), tzinfo=timezone.utc)
     end = datetime.combine(today, datetime.min.time(), tzinfo=timezone.utc)
     return start, end
+
 
 def get_week_range():
     """Возвращает диапазон дат за последние 7 дней (включая сегодня)"""
@@ -39,16 +46,17 @@ def get_week_range():
     end = datetime.combine(today, datetime.min.time(), tzinfo=timezone.utc)
     return start, end
 
+
 def summarize_news(news_list, period='day'):
     """
     Суммаризирует новости за указанный период.
-    
+
     Args:
         news_list: список новостей для суммаризации
         period: 'day' для дня или 'week' для недели
     """
     text = "\n\n".join(news_list)
-    
+
     # Определяем диапазон дат в зависимости от периода
     if period == 'week':
         start, end = get_week_range()
@@ -72,18 +80,18 @@ def summarize_news(news_list, period='day'):
    - Технические термины и аббревиатуры расшифровывай при первом упоминании (если не общеизвестны)
 
 2. СТРУКТУРА СВОДКИ (выводи только разделы, без преамбул и заключений):
-   
+
    **Главное**
    - 3–6 наиболее важных новостей дня
    - Приоритет: события с широким влиянием, прорывы, значимые объявления
    - Формат: 1–3 ключевых факта на пункт, без воды
    - Пример: "Компания X запустила сервис Y в 10 странах. Доступен с 1 марта, стоимость от $Z. (https://t.me/channel/123)"
-   
+
    **AI/ML** (только если есть релевантные новости)
    - 2–6 новостей об искусственном интеллекте, машинном обучении, нейросетях
    - Можно чуть подробнее, но без излишней детализации
    - Включай: новые модели, исследования, продукты, инструменты, регуляцию
-   
+
    **Остальное кратко**
    - Прочие новости, не вошедшие в "Главное" и "AI/ML"
    - Формат: буллеты по 1–2 строки
@@ -143,10 +151,11 @@ AI/ML
     )
     return response.choices[0].message.content.strip()
 
+
 async def get_news(client, channels, period='day'):
     """
     Собирает новости из каналов за указанный период.
-    
+
     Args:
         client: Telethon клиент
         channels: список каналов
@@ -159,7 +168,7 @@ async def get_news(client, channels, period='day'):
     else:
         start, end = get_yesterday_range()
         period_name = "день"
-    
+
     print(f"[DEBUG] Диапазон фильтра за {period_name}: {start} ... {end}")
     for channel_info in channels:
         username = channel_info.get("username")
@@ -176,6 +185,7 @@ async def get_news(client, channels, period='day'):
                 all_news.append(f"{message.text}\nИсточник: https://t.me/{username}/{message.id}\n")
                 print(f"[DEBUG] {username} | id={message.id} | дата={msg_date_norm} - добавлено")
     return all_news
+
 
 def split_message(text, max_length=TELEGRAM_MAX_MESSAGE_LENGTH):
     """
@@ -206,6 +216,7 @@ def split_message(text, max_length=TELEGRAM_MAX_MESSAGE_LENGTH):
         messages.append(current_message)
     return messages
 
+
 async def send_news(summary):
     # Сохраняем саммари в лог перед рассылкой
     try:
@@ -216,7 +227,7 @@ async def send_news(summary):
         print(f"[LOG] Саммари сохранена в {SUMMARIES_LOG_FILE}")
     except Exception as e:
         print(f"[WARN] Не удалось сохранить саммари в файл: {e}")
-    
+
     subscribers = load_subscribers()
     if not subscribers:
         print("[WARN] Нет подписчиков для рассылки.")
@@ -235,7 +246,6 @@ async def send_news(summary):
         print(f"[LOG] Режим отладки выключен. Рассылка для всех подписчиков: {len(subscribers)} пользователей")
 
     bot = Bot(token=telegram_bot_token)
-    active_subscribers = []
     blocked_subscribers = []  # Пользователи, которые заблокировали бота
 
     # Разбиваем summary на части не длиннее 4096 символов
@@ -266,7 +276,6 @@ async def send_news(summary):
                 log_sent_message(user_id=user_id, message_id=result.message_id, text=part_text)
                 # Рекомендуется сделать небольшую паузу между отправками частей
                 await asyncio.sleep(0.1)
-            active_subscribers.append(user_id)
         except Forbidden as e:
             # Пользователь заблокировал бота - удаляем из списка
             error_msg = str(e).lower()
@@ -295,7 +304,7 @@ async def send_news(summary):
         with open(SUBSCRIBERS_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
         # Удаляем только заблокированных пользователей
-        new_subs = [sub for sub in data.get('subscribers',[]) 
+        new_subs = [sub for sub in data.get('subscribers', [])
                    if 'user_id' in sub and sub['user_id'] not in blocked_subscribers]
         with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
             json.dump({"subscribers": new_subs}, f, ensure_ascii=False, indent=2)
@@ -304,8 +313,10 @@ async def send_news(summary):
     except Exception as e:
         print(f"[ERROR] Ошибка обновления активных подписчиков: {e}")
 
+
 async def main():
-    async with TelegramClient('anon_news', api_id, api_hash) as client:
+    session_path = ROOT_DIR / "anon_news.session"
+    async with TelegramClient(str(session_path), api_id, api_hash) as client:
         # Шаг 1: Получить и сохранить полную инфу о каналах из папки
         await get_channels_fullinfo_from_folder(client, FOLDER_NAME)
         # Шаг 2: Загрузить полную инфу о каналах для рассылки
@@ -322,6 +333,7 @@ async def main():
         # Шаг 4: Суммаризация и рассылка
         summary = summarize_news(news)
         await send_news(summary)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

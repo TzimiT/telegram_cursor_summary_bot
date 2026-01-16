@@ -36,6 +36,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": -890983819850256934,
       "username": "AGI_and_RL",
       "restriction_reason": [],
@@ -51,7 +55,8 @@
       "level": null,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -89,6 +94,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": 1236225150744179446,
       "username": "RecSysChannel",
       "restriction_reason": [],
@@ -104,7 +113,8 @@
       "level": 2,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -142,6 +152,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": true,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": -1714981790877312635,
       "username": "nn_for_science",
       "restriction_reason": [],
@@ -157,7 +171,8 @@
       "level": null,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": 1071281889829
     },
     {
       "_": "Channel",
@@ -195,6 +210,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": -132109392956400948,
       "username": "NeuralShit",
       "restriction_reason": [],
@@ -210,7 +229,8 @@
       "level": null,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -248,6 +268,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": -8332457133195070567,
       "username": "derplearning",
       "restriction_reason": [],
@@ -263,7 +287,8 @@
       "level": null,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -301,6 +326,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": true,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": 6507694156272015950,
       "username": "lovedeathtransformers",
       "restriction_reason": [],
@@ -320,7 +349,8 @@
       "level": 2,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": 1071288791823
     },
     {
       "_": "Channel",
@@ -358,6 +388,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": -6949979419214403905,
       "username": "ai_newz",
       "restriction_reason": [],
@@ -373,7 +407,8 @@
       "level": 1,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -411,6 +446,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": -8080333101507228384,
       "username": "seeallochnaya",
       "restriction_reason": [],
@@ -426,7 +465,8 @@
       "level": 2,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -464,6 +504,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": 7206008541016704487,
       "username": "complete_ai",
       "restriction_reason": [],
@@ -479,7 +523,8 @@
       "level": null,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -517,6 +562,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": -5677266439712936804,
       "username": "MLunderhood",
       "restriction_reason": [],
@@ -532,7 +581,8 @@
       "level": 1,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -570,6 +620,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": 3551580354008782208,
       "username": "stuffyNLP",
       "restriction_reason": [],
@@ -585,7 +639,8 @@
       "level": 1,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -623,6 +678,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": 7631632951156387980,
       "username": "singularityfm",
       "restriction_reason": [],
@@ -635,10 +694,11 @@
       "color": null,
       "profile_color": null,
       "emoji_status": null,
-      "level": 2,
+      "level": 1,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -676,6 +736,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": -3480642498995248526,
       "username": "aioftheday",
       "restriction_reason": [],
@@ -691,7 +755,8 @@
       "level": null,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -729,6 +794,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": -6586377027467345441,
       "username": "valuableai",
       "restriction_reason": [],
@@ -744,7 +813,8 @@
       "level": null,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -752,10 +822,10 @@
       "title": "Джейпег Малевича",
       "photo": {
         "_": "ChatPhoto",
-        "photo_id": 5314633562352980736,
+        "photo_id": 5424796913694870790,
         "dc_id": 2,
         "has_video": false,
-        "stripped_thumb": "01080893fd2bfb47a1f2b763763b7a514514867f"
+        "stripped_thumb": "0108083379fda38fdf793e6fbe319a28a2803f"
       },
       "date": "2025-05-23 13:41:50+00:00",
       "creator": false,
@@ -782,6 +852,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": false,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": 6973329155340731370,
       "username": "malepeg",
       "restriction_reason": [],
@@ -790,14 +864,15 @@
       "default_banned_rights": null,
       "participants_count": null,
       "usernames": [],
-      "stories_max_id": 71,
+      "stories_max_id": 73,
       "color": null,
       "profile_color": null,
       "emoji_status": null,
       "level": 10,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -835,6 +910,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": -8831358499510979553,
       "username": "opendatascience",
       "restriction_reason": [],
@@ -850,7 +929,8 @@
       "level": null,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -888,6 +968,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": true,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": 4649826130907855587,
       "username": "denissexy",
       "restriction_reason": [],
@@ -907,7 +991,8 @@
       "level": 4,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": 1071051500113
     },
     {
       "_": "Channel",
@@ -945,6 +1030,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": 3824884663954354411,
       "username": "ml_news",
       "restriction_reason": [],
@@ -960,7 +1049,8 @@
       "level": null,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -998,6 +1088,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": true,
+      "broadcast_messages_allowed": true,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": -4823935733593390142,
       "username": null,
       "restriction_reason": [],
@@ -1070,7 +1164,8 @@
       "level": 100,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": 1071006503122
     },
     {
       "_": "Channel",
@@ -1108,6 +1203,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": -5929517043542128575,
       "username": "neuraldvig",
       "restriction_reason": [],
@@ -1123,7 +1222,8 @@
       "level": 1,
       "subscription_until_date": null,
       "bot_verification_icon": null,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     },
     {
       "_": "Channel",
@@ -1161,6 +1261,10 @@
       "stories_hidden_min": false,
       "stories_unavailable": true,
       "signature_profiles": false,
+      "autotranslation": false,
+      "broadcast_messages_allowed": false,
+      "monoforum": false,
+      "forum_tabs": false,
       "access_hash": -7525667815655593519,
       "username": "danieltrbn",
       "restriction_reason": [],
@@ -1180,7 +1284,8 @@
       "level": 2,
       "subscription_until_date": null,
       "bot_verification_icon": 5800899949440800754,
-      "send_paid_messages_stars": null
+      "send_paid_messages_stars": null,
+      "linked_monoforum_id": null
     }
   ]
 }

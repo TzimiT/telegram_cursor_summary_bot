@@ -3,7 +3,7 @@
 ## ✅ Подготовка перед деплоем
 
 - [ ] Код загружен в GitHub репозиторий
-- [ ] Локально создан файл `anon_news.session` (запустите `run_daily.py` один раз)
+- [ ] Локально создан файл `anon_news.session` (запустите `scripts/run_daily.py` один раз)
 - [ ] Все зависимости указаны в `requirements.txt`
 - [ ] `config.py` обновлен для поддержки переменных окружения
 
@@ -19,7 +19,7 @@
   - [ ] `FOLDER_NAME`
   - [ ] `DEBUG_MODE=False`
 - [ ] Загрузили файл `anon_news.session` (через CLI или как переменную)
-- [ ] Настроили Scheduled Task для ежедневной рассылки (cron: `0 9 * * *`, команда: `python run_daily.py --send`)
+- [ ] Настроили Scheduled Task для ежедневной рассылки (cron: `0 9 * * *`, команда: `python scripts/run_daily.py --send`)
 - [ ] Проверили логи - бот должен быть запущен
 - [ ] Протестировали бота командой `/start` в Telegram
 
@@ -35,10 +35,10 @@
 ### Локально (для подготовки)
 ```bash
 # Создать файл сессии
-python run_daily.py --channels
+python scripts/run_daily.py --channels
 
 # Закодировать сессию для загрузки в облако
-python upload_session.py
+python scripts/upload_session.py
 ```
 
 ### В облаке (Railway CLI)
@@ -79,7 +79,7 @@ railway variables set API_ID=YOUR_API_ID
 
 ### Ежедневная рассылка не работает
 - Проверьте настройки Scheduled Task
-- Убедитесь, что команда правильная: `python run_daily.py --send`
+- Убедитесь, что команда правильная: `python scripts/run_daily.py --send`
 - Проверьте логи выполнения задачи
 
 ---

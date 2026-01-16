@@ -1,25 +1,34 @@
-import asyncio
 import argparse
+import asyncio
 import json
-import os
+import sys
 from datetime import datetime
+from pathlib import Path
 
 from telethon import TelegramClient
 from telegram import Bot
 
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 import config
-from get_channels import get_channels_fullinfo_from_folder, load_channels_from_json
-from news_bot_part import get_news, summarize_news, send_news
+from src.get_channels import get_channels_fullinfo_from_folder, load_channels_from_json
+from src.news_bot_part import get_news, summarize_news, send_news
 
 
-SUBSCRIBERS_FILE = getattr(config, 'SUBSCRIBERS_FILE', 'subscribers.json')
-SUMMARIES_LOG_FILE = "sent_summaries.log"
+DEFAULT_SUBSCRIBERS_FILE = ROOT_DIR / "subscribers.json"
+SUBSCRIBERS_FILE = Path(getattr(config, 'SUBSCRIBERS_FILE', DEFAULT_SUBSCRIBERS_FILE))
+if not SUBSCRIBERS_FILE.is_absolute():
+    SUBSCRIBERS_FILE = ROOT_DIR / SUBSCRIBERS_FILE
+
+SUMMARIES_LOG_FILE = ROOT_DIR / "sent_summaries.log"
 
 
-def _backup_file(path: str):
-    if os.path.exists(path):
+def _backup_file(path: Path):
+    if path.exists():
         ts = datetime.now().strftime('%Y%m%d-%H%M%S')
-        bak = f"{path}.{ts}.bak"
+        bak = path.with_suffix(path.suffix + f".{ts}.bak")
         try:
             with open(path, 'rb') as src, open(bak, 'wb') as dst:
                 dst.write(src.read())
@@ -28,8 +37,8 @@ def _backup_file(path: str):
             print(f"[WARN] Не удалось создать бэкап {path}: {e}")
 
 
-def _load_json(path: str, default):
-    if not os.path.exists(path):
+def _load_json(path: Path, default):
+    if not path.exists():
         return default
     try:
         with open(path, 'r', encoding='utf-8') as f:
@@ -39,7 +48,7 @@ def _load_json(path: str, default):
         return default
 
 
-def _save_json(path: str, data):
+def _save_json(path: Path, data):
     _backup_file(path)
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -69,7 +78,7 @@ async def verify_subscribers_delivery(bot: Bot):
     """
     data = _load_json(SUBSCRIBERS_FILE, {"subscribers": []})
     subs = [s.get('user_id') for s in data.get('subscribers', []) if 'user_id' in s]
-    
+
     # Фильтрация подписчиков в режиме отладки
     if getattr(config, 'DEBUG_MODE', False):
         debug_ids = getattr(config, 'DEBUG_USER_IDS', [])
@@ -77,7 +86,7 @@ async def verify_subscribers_delivery(bot: Bot):
             debug_ids = [debug_ids]
         subs = [uid for uid in subs if uid in debug_ids]
         print(f"[DEBUG] Режим отладки включен. Проверка доступности только для тестовых пользователей: {subs}")
-    
+
     ok = []
     for uid in subs:
         try:
@@ -99,7 +108,22 @@ async def run_pipeline(args):
     # 2) Обновление каналов
     channels = None
     if args.channels or args.news or args.send:
-        async with TelegramClient('anon_news', config.api_id, config.api_hash) as client:
+        session_path = ROOT_DIR / "anon_news.session"
+        if not session_path.exists():
+            raise FileNotFoundError(
+                f"Не найдена user-сессия Telethon: {session_path}. "
+                "Положи файл anon_news.session в корень проекта"
+            )
+
+        async with TelegramClient(str(session_path), config.api_id, config.api_hash) as client:
+            me = await client.get_me()
+            if not me:
+                raise RuntimeError("Telethon сессия не авторизована как пользователь.")
+            if getattr(me, "bot", False):
+                raise RuntimeError(
+                    "Telethon сессия принадлежит боту. Нужна user session "
+                    "(вход по телефону) в файле anon_news.session."
+                )
             if args.channels:
                 await get_channels_fullinfo_from_folder(client, config.FOLDER_NAME)
             channels = load_channels_from_json()
@@ -107,7 +131,7 @@ async def run_pipeline(args):
                 # Определяем период: неделя или день
                 period = 'week' if args.weekly else 'day'
                 period_name = "неделю" if args.weekly else "вчера"
-                
+
                 print(f"[LOG] Каналы для агрегации: {[ch.get('username','?') for ch in channels]}")
                 news = await get_news(client, channels, period=period)
                 print(f"[LOG] Найдено новостей за {period_name}: {len(news)}")

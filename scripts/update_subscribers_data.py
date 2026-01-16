@@ -4,19 +4,26 @@
 """
 import asyncio
 import json
-import os
+import sys
 from datetime import datetime
+from pathlib import Path
+
 from telegram import Bot
 from telegram.error import TelegramError, Forbidden, BadRequest
 from telethon import TelegramClient
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 import config
 
-SUBSCRIBERS_FILE = "subscribers.json"
+SUBSCRIBERS_FILE = ROOT_DIR / "subscribers.json"
 
 
 def _load_subscribers():
     """Загружает список подписчиков из файла."""
-    if not os.path.exists(SUBSCRIBERS_FILE):
+    if not SUBSCRIBERS_FILE.exists():
         print(f"[ERROR] Файл {SUBSCRIBERS_FILE} не найден")
         return []
     try:
@@ -32,13 +39,13 @@ def _save_subscribers(subscribers):
     """Сохраняет список подписчиков в файл."""
     try:
         # Создаем бэкап
-        if os.path.exists(SUBSCRIBERS_FILE):
+        if SUBSCRIBERS_FILE.exists():
             timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
-            backup_file = f"{SUBSCRIBERS_FILE}.{timestamp}.bak"
+            backup_file = SUBSCRIBERS_FILE.with_suffix(SUBSCRIBERS_FILE.suffix + f".{timestamp}.bak")
             with open(SUBSCRIBERS_FILE, 'rb') as src, open(backup_file, 'wb') as dst:
                 dst.write(src.read())
             print(f"[LOG] Создан бэкап: {backup_file}")
-        
+
         with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
             json.dump({"subscribers": subscribers}, f, ensure_ascii=False, indent=2)
         print(f"[LOG] Данные сохранены в {SUBSCRIBERS_FILE}")
@@ -101,24 +108,25 @@ async def update_subscribers_data():
     if not subscribers:
         print("[ERROR] Список подписчиков пуст")
         return
-    
+
     print(f"[LOG] Найдено подписчиков: {len(subscribers)}")
-    
+
     bot = Bot(token=config.telegram_bot_token)
     updated_count = 0
     skipped_count = 0
-    
+
     # Создаем Telethon клиент один раз для всех запросов
     telethon_available = False
+    session_path = ROOT_DIR / "anon_news.session"
     try:
-        client = TelegramClient('anon_news', config.api_id, config.api_hash)
+        client = TelegramClient(str(session_path), config.api_id, config.api_hash)
         await client.start()
         telethon_available = True
         print("[LOG] Telethon клиент подключен")
     except Exception as e:
         print(f"[WARN] Не удалось подключиться к Telethon: {e}")
         print("[LOG] Будем использовать только Bot API")
-    
+
     try:
         # Обновляем данные для каждого подписчика
         for idx, sub in enumerate(subscribers, 1):
@@ -127,25 +135,25 @@ async def update_subscribers_data():
                 print(f"[WARN] Пропущен подписчик #{idx}: отсутствует user_id")
                 skipped_count += 1
                 continue
-            
+
             print(f"[LOG] [{idx}/{len(subscribers)}] Обработка user_id={user_id}...")
-            
+
             # Проверяем, нужно ли обновлять данные
             has_all_fields = all(key in sub and sub[key] for key in ['username', 'first_name', 'last_name'])
             if has_all_fields and sub.get('username') != '-' and sub.get('first_name') != '-':
                 print(f"  ✓ Данные уже полные, пропускаем")
                 continue
-            
+
             # Пытаемся получить данные через Bot API
             user_info = await get_user_info_via_bot(bot, user_id)
-            
+
             # Если не получилось через Bot API, пробуем через Telethon
             if not user_info and telethon_available:
                 try:
                     user_info = await get_user_info_via_telethon(client, user_id)
                 except Exception as e:
                     print(f"  [WARN] Ошибка Telethon для {user_id}: {e}")
-            
+
             # Обновляем данные
             if user_info:
                 # Сохраняем существующие данные, если они есть и лучше новых
@@ -155,11 +163,11 @@ async def update_subscribers_data():
                     sub['first_name'] = user_info.get('first_name', '-')
                 if 'last_name' not in sub or sub.get('last_name') == '-' or not sub.get('last_name'):
                     sub['last_name'] = user_info.get('last_name', '-')
-                
+
                 # Добавляем дату, если её нет
                 if 'added_at' not in sub or not sub.get('added_at'):
                     sub['added_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                
+
                 updated_count += 1
                 print(f"  ✓ Обновлено: @{sub['username']} ({sub['first_name']} {sub['last_name']})")
             else:
@@ -172,10 +180,10 @@ async def update_subscribers_data():
                     sub['last_name'] = "-"
                 if 'added_at' not in sub or not sub.get('added_at'):
                     sub['added_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                
+
                 print(f"  ⚠ Не удалось получить данные, заполнены значения по умолчанию")
                 updated_count += 1
-            
+
             # Небольшая пауза между запросами
             await asyncio.sleep(0.2)
     finally:
@@ -183,10 +191,10 @@ async def update_subscribers_data():
         if telethon_available:
             await client.disconnect()
             print("[LOG] Telethon клиент отключен")
-    
+
     # Сохраняем обновленные данные
     _save_subscribers(subscribers)
-    
+
     print(f"\n[LOG] Обновление завершено:")
     print(f"  - Обновлено записей: {updated_count}")
     print(f"  - Пропущено: {skipped_count}")

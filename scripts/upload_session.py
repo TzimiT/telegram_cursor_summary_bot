@@ -6,21 +6,25 @@
 import base64
 import os
 import sys
+from pathlib import Path
 
-SESSION_FILE = "anon_news.session"
+ROOT_DIR = Path(__file__).resolve().parents[1]
+
+SESSION_FILE = ROOT_DIR / "anon_news.session"
+
 
 def encode_session_to_base64():
     """Конвертирует файл сессии в base64 строку для загрузки в облако"""
-    if not os.path.exists(SESSION_FILE):
+    if not SESSION_FILE.exists():
         print(f"❌ Файл {SESSION_FILE} не найден!")
-        print(f"💡 Запустите один раз run_daily.py локально, чтобы создать файл сессии")
+        print("💡 Запустите один раз scripts/run_daily.py локально, чтобы создать файл сессии")
         sys.exit(1)
-    
+
     with open(SESSION_FILE, 'rb') as f:
         session_data = f.read()
-    
+
     encoded = base64.b64encode(session_data).decode('utf-8')
-    
+
     print("=" * 80)
     print("✅ Файл сессии закодирован в base64")
     print("=" * 80)
@@ -30,6 +34,7 @@ def encode_session_to_base64():
     print(f"echo '{encoded}' > session_base64.txt")
     print("=" * 80)
 
+
 def decode_session_from_base64(encoded_str=None, output_file=SESSION_FILE):
     """Декодирует base64 строку обратно в файл сессии"""
     if encoded_str is None:
@@ -37,9 +42,9 @@ def decode_session_from_base64(encoded_str=None, output_file=SESSION_FILE):
         encoded_str = os.getenv('TELEGRAM_SESSION_B64')
         if not encoded_str:
             print("❌ Переменная окружения TELEGRAM_SESSION_B64 не найдена")
-            print("💡 Использование: python upload_session.py decode <base64_string>")
+            print("💡 Использование: python scripts/upload_session.py decode <base64_string>")
             sys.exit(1)
-    
+
     try:
         session_data = base64.b64decode(encoded_str)
         with open(output_file, 'wb') as f:
@@ -48,6 +53,7 @@ def decode_session_from_base64(encoded_str=None, output_file=SESSION_FILE):
     except Exception as e:
         print(f"❌ Ошибка декодирования: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "decode":

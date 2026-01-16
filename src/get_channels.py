@@ -1,9 +1,12 @@
-from telethon.tl.functions.messages import GetDialogFiltersRequest
-from config import api_id, api_hash
 import json
-import os
 
-CHANNELS_FILE = "channels.json"
+from telethon.tl.functions.messages import GetDialogFiltersRequest
+
+from src.paths import ROOT_DIR
+
+
+CHANNELS_FILE = ROOT_DIR / "channels.json"
+
 
 def serialize_for_json(obj):
     """
@@ -21,6 +24,7 @@ def serialize_for_json(obj):
         return serialize_for_json(vars(obj))
     else:
         return str(obj)
+
 
 async def get_channels_fullinfo_from_folder(client, folder_name):
     filters_resp = await client(GetDialogFiltersRequest())
@@ -70,8 +74,9 @@ async def get_channels_fullinfo_from_folder(client, folder_name):
 
     return result_channels
 
+
 def load_channels_from_json():
-    if not os.path.exists(CHANNELS_FILE):
+    if not CHANNELS_FILE.exists():
         print(f"[WARN] Файл {CHANNELS_FILE} не найден.")
         return []
     with open(CHANNELS_FILE, "r", encoding="utf-8") as f:

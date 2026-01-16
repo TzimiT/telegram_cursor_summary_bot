@@ -1,15 +1,20 @@
 import asyncio
 import json
-import os
+import sys
 from datetime import datetime
+from pathlib import Path
 
 from telegram import Bot
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 # Локальные настройки/секреты
 import config  # должен содержать telegram_bot_token
 
 
-SUBSCRIBERS_FILE = "subscribers.json"
+SUBSCRIBERS_FILE = ROOT_DIR / "subscribers.json"
 
 
 def _load_subscribers():
@@ -17,7 +22,7 @@ def _load_subscribers():
     Загружает список подписчиков в формате {"subscribers": [ {...} ]}.
     Возвращает список словарей подписчиков.
     """
-    if not os.path.exists(SUBSCRIBERS_FILE):
+    if not SUBSCRIBERS_FILE.exists():
         return []
     try:
         with open(SUBSCRIBERS_FILE, "r", encoding="utf-8") as f:
@@ -133,6 +138,6 @@ if __name__ == "__main__":
     print(
         "[INFO] Перед запуском убедитесь, что основной бот остановлен (polling/webhook),\n"
         "       чтобы избежать конкуренции за getUpdates.\n"
-        "       Запуск: python backfill_users_once.py\n"
+        "       Запуск: python scripts/backfill_users_once.py\n"
     )
     asyncio.run(backfill_from_updates())

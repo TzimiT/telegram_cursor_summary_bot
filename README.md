@@ -2,9 +2,9 @@ Clean News Bot — ежедневный дайджест из Telegram
 
 О проекте
 - Репозиторий содержит два кооперативных скрипта на Python:
-  - get_users.py — Telegram‑бот для подписки/отписки пользователей и служебных команд.
-  - run_daily.py — единая точка входа для ежедневной рассылки: обновляет каналы, собирает новости, суммаризирует через OpenAI и рассылает дайджест подписчикам.
-  - news_bot_part.py — модуль с функциями агрегации и рассылки (используется run_daily.py).
+  - scripts/get_users.py — Telegram‑бот для подписки/отписки пользователей и служебных команд.
+  - scripts/run_daily.py — единая точка входа для ежедневной рассылки: обновляет каналы, собирает новости, суммаризирует через OpenAI и рассылает дайджест подписчикам.
+  - src/news_bot_part.py — модуль с функциями агрегации и рассылки (используется scripts/run_daily.py).
 
 Стек
 - Python 3.10+ (asyncio)
@@ -17,10 +17,10 @@ Clean News Bot — ежедневный дайджест из Telegram
 - Docker — поддержка контейнеризации (опционально)
 
 Точки входа и вспомогательные файлы
-- get_users.py — запускает бота с командами: /start, /stop, /channels, /status, /recommend_channel. Должен работать постоянно (cron/pm2/systemd/Screen/Docker).
-- run_daily.py — единый скрипт для ежедневной рассылки с аргументами командной строки. Запускать по расписанию (cron/Scheduled Task).
-- news_bot_part.py — модуль с функциями get_news(), summarize_news(), send_news() (используется run_daily.py).
-- get_channels.py — утилита для работы с каналами из папки Telegram.
+- scripts/get_users.py — запускает бота с командами: /start, /stop, /channels, /status, /recommend_channel. Должен работать постоянно (cron/pm2/systemd/Screen/Docker).
+- scripts/run_daily.py — единый скрипт для ежедневной рассылки с аргументами командной строки. Запускать по расписанию (cron/Scheduled Task).
+- src/news_bot_part.py — модуль с функциями get_news(), summarize_news(), send_news() (используется scripts/run_daily.py).
+- src/get_channels.py — утилита для работы с каналами из папки Telegram.
 - mycron.txt — примеры записей crontab для обоих скриптов.
 - commands.txt — личные заметки по эксплуатации (не обязателен для работы).
 
@@ -34,11 +34,11 @@ Clean News Bot — ежедневный дайджест из Telegram
 Структура проекта
 - config_example.py — шаблон конфигурации. Скопируйте в config.py и заполните поля.
 - config.py — конфигурация с поддержкой переменных окружения (приоритет: переменные окружения → значения по умолчанию). Не публикуйте реальные ключи в публичный репозиторий.
-- get_channels.py — утилита для выгрузки информации о каналах из папки Telegram в channels.json.
-- get_users.py — точка входа бота подписчиков (python-telegram-bot).
-- run_daily.py — единый скрипт для ежедневной рассылки с аргументами командной строки.
-- news_bot_part.py — модуль с функциями агрегации и рассылки (Telethon + OpenAI).
-- channels.json — список каналов для агрегации (формируется/обновляется get_channels.py или run_daily.py --channels).
+- src/get_channels.py — утилита для выгрузки информации о каналах из папки Telegram в channels.json.
+- scripts/get_users.py — точка входа бота подписчиков (python-telegram-bot).
+- scripts/run_daily.py — единый скрипт для ежедневной рассылки с аргументами командной строки.
+- src/news_bot_part.py — модуль с функциями агрегации и рассылки (Telethon + OpenAI).
+- channels.json — список каналов для агрегации (формируется/обновляется src/get_channels.py или scripts/run_daily.py --channels).
 - subscribers.json — список подписчиков в формате { "subscribers": [ { ... } ] }.
 - sent_messages.log — лог каждой отправленной части сообщения (время, user_id, message_id, длина, полный текст).
 - sent_summaries.log — лог полных саммари перед рассылкой (с датой и временем).
@@ -48,7 +48,7 @@ Clean News Bot — ежедневный дайджест из Telegram
 - Procfile — конфигурация для деплоя на Railway/Render.
 - DEPLOY.md, QUICK_DEPLOY.md — инструкции по развертыванию в облаке.
 - Прочее: commands.txt, channel_recommendations.txt, tz*.txt.
-- Утилиты: backfill_users_once.py, update_subscribers_data.py, upload_session.py.
+- Утилиты: scripts/backfill_users_once.py, scripts/update_subscribers_data.py, scripts/upload_session.py.
 
 Конфигурация
 1) Создайте config.py на основе шаблона:
@@ -96,32 +96,32 @@ Clean News Bot — ежедневный дайджест из Telegram
 Вариант A: вручную
 - Запустить бота подписчиков (должен работать постоянно):
   ```bash
-  python get_users.py
+  python scripts/get_users.py
   ```
 
 - Прогнать агрегатор один раз (для проверки):
   ```bash
-  python run_daily.py --send
+  python scripts/run_daily.py --send
   ```
   
   Или использовать отдельные этапы:
   ```bash
-  python run_daily.py --channels    # Обновить channels.json
-  python run_daily.py --news        # Только собрать новости (без отправки)
-  python run_daily.py --send        # Полный цикл: каналы → новости → рассылка
-  python run_daily.py --dry-run     # Превью без отправки
-  python run_daily.py --summary-only  # Сохранить сводку в файл
-  python run_daily.py --verify      # Проверить доступность подписчиков
+  python scripts/run_daily.py --channels    # Обновить channels.json
+  python scripts/run_daily.py --news        # Только собрать новости (без отправки)
+  python scripts/run_daily.py --send        # Полный цикл: каналы → новости → рассылка
+  python scripts/run_daily.py --dry-run     # Превью без отправки
+  python scripts/run_daily.py --summary-only  # Сохранить сводку в файл
+  python scripts/run_daily.py --verify      # Проверить доступность подписчиков
   ```
 
 Вариант B: по расписанию (cron)
 - См. mycron.txt. Пример (подставьте свои пути):
   ```bash
   # Каждую минуту поддерживать запуск бота (или используйте systemd/pm2):
-  * * * * * cd /path/to/actual_news_bot && /path/to/actual_news_bot/venv/bin/python get_users.py >> users.log 2>&1
+  * * * * * cd /path/to/actual_news_bot && /path/to/actual_news_bot/venv/bin/python scripts/get_users.py >> users.log 2>&1
   
   # Каждый день в 09:00 собирать и рассылать дайджест:
-  0 9 * * * cd /path/to/actual_news_bot && /path/to/actual_news_bot/venv/bin/python run_daily.py --send >> bot.log 2>&1
+  0 9 * * * cd /path/to/actual_news_bot && /path/to/actual_news_bot/venv/bin/python scripts/run_daily.py --send >> bot.log 2>&1
   ```
 
 Вариант C: Docker
@@ -148,24 +148,24 @@ Clean News Bot — ежедневный дайджест из Telegram
 
 Данные и логи
 - subscribers.json
-  - Автоматически поддерживается get_users.py при /start и любом сообщении.
+  - Автоматически поддерживается scripts/get_users.py при /start и любом сообщении.
   - Формат: { "subscribers": [ { "user_id": ..., "username": ..., "first_name": ..., "last_name": ..., "added_at": ... } ] }
-  - После рассылки run_daily.py/news_bot_part.py автоматически удаляет заблокировавших бота пользователей.
+  - После рассылки scripts/run_daily.py и src/news_bot_part.py автоматически удаляют заблокировавших бота пользователей.
   - Перед рассылкой создается бэкап с timestamp: subscribers.json.YYYYMMDD-HHMMSS.bak
 - channels.json
-  - Генерируется get_channels.py или run_daily.py --channels на основе папки FOLDER_NAME.
+  - Генерируется src/get_channels.py или scripts/run_daily.py --channels на основе папки FOLDER_NAME.
   - Ключевые поля: username, id, title (и другие метаданные канала).
 - sent_messages.log
   - Лог каждой отправленной части сообщения: время (UTC), user_id, message_id, длина и ПОЛНЫЙ текст.
   - Важно: файл хранит содержимое рассылок. Учитывайте приватность и ротацию логов.
 - sent_summaries.log
   - Лог полных саммари перед рассылкой (с датой и временем отправки).
-  - Сохраняется автоматически перед рассылкой в run_daily.py и news_bot_part.py.
+  - Сохраняется автоматически перед рассылкой в scripts/run_daily.py и src/news_bot_part.py.
 - users.log, bot.log
   - Стандартные логи работы скриптов (если перенаправлен stdout/stderr).
 
 Как это работает (коротко)
-1) get_users.py
+1) scripts/get_users.py
    - Поднимает приложение python-telegram-bot и регистрирует хендлеры:
      - /start — добавляет пользователя в subscribers.json
      - /stop — удаляет из подписки
@@ -175,7 +175,7 @@ Clean News Bot — ежедневный дайджест из Telegram
      - /help — справка по командам
      - Любое текстовое сообщение — также добавляет в подписчики (если еще не подписан)
 
-2) run_daily.py (рекомендуемый способ запуска рассылки)
+2) scripts/run_daily.py (рекомендуемый способ запуска рассылки)
    - Единая точка входа с аргументами командной строки:
      - --channels — обновить channels.json из телеграм-папки
      - --verify — проверить доступность подписчиков перед рассылкой
@@ -187,7 +187,7 @@ Clean News Bot — ежедневный дайджест из Telegram
    - Создает бэкапы файлов перед изменением
    - Сохраняет саммари в sent_summaries.log перед рассылкой
 
-3) news_bot_part.py (модуль с функциями)
+3) src/news_bot_part.py (модуль с функциями)
    - get_news() — через Telethon собирает сообщения за «вчера» (UTC) из каналов, добавляя ссылку-источник вида https://t.me/<username>/<id>
    - summarize_news() — отправляет текст в OpenAI Chat Completions (модель: gpt-4.1-mini) для суммаризации по заданному формату разделов
    - send_news() — дробит итог на части ≤4096 символов и рассылает подписчикам через Bot API
@@ -217,11 +217,11 @@ Clean News Bot — ежедневный дайджест из Telegram
   - Укажите DEBUG_USER_IDS (список user_id для тестовой рассылки)
   - Рассылка будет выполняться только указанным пользователям
 - Режим «сухого запуска»:
-  - `python run_daily.py --dry-run` — покажет превью саммари без отправки
-  - `python run_daily.py --summary-only` — сохранит сводку в файл
-  - `python run_daily.py --news` — только соберет новости без отправки
+  - `python scripts/run_daily.py --dry-run` — покажет превью саммари без отправки
+  - `python scripts/run_daily.py --summary-only` — сохранит сводку в файл
+  - `python scripts/run_daily.py --news` — только соберет новости без отправки
 - Проверка доступности подписчиков:
-  - `python run_daily.py --verify` — проверит доступность всех подписчиков перед рассылкой
+  - `python scripts/run_daily.py --verify` — проверит доступность всех подписчиков перед рассылкой
 - TODO:
   - Автотесты для split_message (дробление длинных сообщений)
   - Автотесты для загрузки/сохранения подписчиков
@@ -247,7 +247,7 @@ Clean News Bot — ежедневный дайджест из Telegram
   - Файл сессии нужно загрузить на сервер при деплое в облако (см. DEPLOY.md).
 - Если каналы не подтягиваются:
   - Проверьте соответствие FOLDER_NAME реальной папке с нужными каналами
-  - Запустите `python run_daily.py --channels` для обновления channels.json
+  - Запустите `python scripts/run_daily.py --channels` для обновления channels.json
   - Проверьте, что папка содержит каналы и они доступны вашему аккаунту
 - Пустая рассылка:
   - Значит за вчера (UTC) не было сообщений; отправка будет пропущена
@@ -259,15 +259,15 @@ Clean News Bot — ежедневный дайджест из Telegram
 - Ошибки рассылки:
   - Проверьте sent_messages.log для деталей
   - Пользователи, заблокировавшие бота, автоматически удаляются из subscribers.json
-  - Используйте `python run_daily.py --verify` для проверки доступности подписчиков
+  - Используйте `python scripts/run_daily.py --verify` для проверки доступности подписчиков
 - Логи и бэкапы:
   - Бэкапы файлов создаются автоматически перед изменением (формат: filename.YYYYMMDD-HHMMSS.bak)
   - Проверяйте логи на наличие [WARN] и [ERROR] сообщений
 
 Дополнительные утилиты
-- backfill_users_once.py — утилита для одноразового заполнения данных подписчиков
-- update_subscribers_data.py — утилита для обновления данных подписчиков
-- upload_session.py — утилита для загрузки файла сессии Telethon
+- scripts/backfill_users_once.py — утилита для одноразового заполнения данных подписчиков
+- scripts/update_subscribers_data.py — утилита для обновления данных подписчиков
+- scripts/upload_session.py — утилита для загрузки файла сессии Telethon
 
 Деплой в облако
 - Подробные инструкции: см. DEPLOY.md (Railway, Render, DigitalOcean, VPS)

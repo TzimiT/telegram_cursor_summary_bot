@@ -1,5 +1,5 @@
 # Каждую минуту обновлять подписчиков
-* * * * * cd /Users/tzimit/Yandex.Disk.localized/clean_news_bot && /Users/tzimit/Yandex.Disk.localized/clean_news_bot/venv/bin/python get_users.py >> users.log 2>&1
+* * * * * cd /Users/tzimit/Yandex.Disk.localized/clean_news_bot && /Users/tzimit/Yandex.Disk.localized/clean_news_bot/venv/bin/python scripts/get_users.py >> users.log 2>&1
 
 # Каждый день в 9:00 делать рассылку
-0 9 * * * cd /Users/tzimit/Yandex.Disk.localized/clean_news_bot && /Users/tzimit/Yandex.Disk.localized/clean_news_bot/venv/bin/python news_bot_part.py >> bot.log 2>&1
+0 9 * * * cd /Users/tzimit/Yandex.Disk.localized/clean_news_bot && /Users/tzimit/Yandex.Disk.localized/clean_news_bot/venv/bin/python scripts/run_daily.py --send >> bot.log 2>&1

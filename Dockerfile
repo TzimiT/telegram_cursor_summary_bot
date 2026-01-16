@@ -13,4 +13,4 @@ COPY . .
 RUN mkdir -p /app/data
 
 # Запуск бота
-CMD ["python", "get_users.py"]
+CMD ["python", "scripts/get_users.py"]

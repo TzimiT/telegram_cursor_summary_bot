@@ -1,1 +1,1 @@
-worker: python get_users.py
+worker: python scripts/get_users.py

@@ -1,13 +1,22 @@
+import json
 import logging
+import sys
+from datetime import datetime
+from pathlib import Path
+
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler
 )
-import json
-import os
-from datetime import datetime
 
-SUBSCRIBERS_FILE = "subscribers.json"
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+
+SUBSCRIBERS_FILE = ROOT_DIR / "subscribers.json"
+CHANNELS_FILE = ROOT_DIR / "channels.json"
+RECOMMENDATIONS_FILE = ROOT_DIR / "channel_recommendations.txt"
 RECOMMEND_WAIT_INPUT = 1
 
 logging.basicConfig(
@@ -17,8 +26,9 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-def _load_json(path: str, default):
-    if not os.path.exists(path):
+
+def _load_json(path: Path, default):
+    if not path.exists():
         return default
     try:
         with open(path, 'r', encoding='utf-8') as f:
@@ -27,15 +37,17 @@ def _load_json(path: str, default):
         logging.warning(f"[WARN] Ошибка чтения {path}: {e}")
         return default
 
-def _save_json(path: str, data):
+
+def _save_json(path: Path, data):
     try:
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as e:
         logging.error(f"[ERROR] Ошибка записи {path}: {e}")
 
+
 def load_subscribers():
-    if not os.path.exists(SUBSCRIBERS_FILE):
+    if not SUBSCRIBERS_FILE.exists():
         logger.warning("[WARN] Файл с подписчиками не найден, список пуст")
         return []
     try:
@@ -45,6 +57,7 @@ def load_subscribers():
     except Exception as e:
         logger.error(f"[ERROR] Ошибка чтения {SUBSCRIBERS_FILE}: {e}")
         return []
+
 
 def save_subscriber(user: Update.effective_user):
     subscribers = load_subscribers()
@@ -64,6 +77,7 @@ def save_subscriber(user: Update.effective_user):
         return True
     return False
 
+
 def remove_subscriber(user_id):
     subscribers = load_subscribers()
     new_subs = [sub for sub in subscribers if 'user_id' in sub and sub['user_id'] != user_id]
@@ -71,12 +85,14 @@ def remove_subscriber(user_id):
         json.dump({"subscribers": new_subs}, f, ensure_ascii=False, indent=2)
     logger.info(f"Пользователь {user_id} удалён из подписчиков.")
 
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     was_added = save_subscriber(user)
     await update.message.reply_text(
         "Привет! Ты добавлен в рассылку новостей." if was_added else "Ты уже в списке рассылки."
     )
+
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -89,6 +105,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/status — узнать статус подписки"
     )
 
+
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     was_added = save_subscriber(user)
@@ -97,10 +114,12 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("Ты уже подписан.")
 
+
 async def stop_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     remove_subscriber(user.id)
     await update.message.reply_text("Ты отписан от рассылки. Возвращайся, если что!")
+
 
 # --- Recommend Channel Conversation ---
 
@@ -111,6 +130,7 @@ async def recommend_channel_start(update: Update, context: ContextTypes.DEFAULT_
     )
     return RECOMMEND_WAIT_INPUT
 
+
 async def recommend_channel_receive(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     text = update.message.text.strip()
@@ -120,21 +140,22 @@ async def recommend_channel_receive(update: Update, context: ContextTypes.DEFAUL
         f"name: {user.first_name or '-'} {user.last_name or '-'} | "
         f"recommend: {text}\n"
     )
-    with open("channel_recommendations.txt", "a", encoding="utf-8") as f:
+    with open(RECOMMENDATIONS_FILE, "a", encoding="utf-8") as f:
         f.write(rec_info)
     await update.message.reply_text("Спасибо! Ваша рекомендация отправлена администратору.")
     return ConversationHandler.END
+
 
 async def recommend_channel_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Рекомендация отменена.")
     return ConversationHandler.END
 
+
 # --- /channels: показать список каналов (читает channels.json) ---
 async def channels_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
-        with open("channels.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-            channels = data.get("channels", [])
+        data = _load_json(CHANNELS_FILE, {"channels": []})
+        channels = data.get("channels", [])
         if not channels:
             await update.message.reply_text("Список каналов пуст.")
             return
@@ -145,6 +166,7 @@ async def channels_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         await update.message.reply_text(f"Не удалось получить список каналов: {e}")
 
+
 # --- /status: статус подписки ---
 async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -154,6 +176,7 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Ты подписан на рассылку ✅")
     else:
         await update.message.reply_text("Ты не подписан на рассылку.")
+
 
 def main():
     import config  # импортирует telegram_bot_token из твоего конфига
@@ -182,6 +205,7 @@ def main():
 
     logger.info("Бот запущен, ожидает сообщений...")
     app.run_polling()
+
 
 if __name__ == '__main__':
     main()

@@ -3,7 +3,7 @@ services:
     name: news-bot
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python get_users.py
+    startCommand: python scripts/get_users.py
     envVars:
       - key: API_ID
         sync: false
