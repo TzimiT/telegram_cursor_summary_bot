@@ -19,6 +19,7 @@ Clean News Bot — ежедневный дайджест из Telegram
 Точки входа и вспомогательные файлы
 - scripts/get_users.py — запускает бота с командами: /start, /stop, /channels, /status, /recommend_channel. Должен работать постоянно (cron/pm2/systemd/Screen/Docker).
 - scripts/run_daily.py — единый скрипт для ежедневной рассылки с аргументами командной строки. Запускать по расписанию (cron/Scheduled Task).
+- scripts/create_user_session.py — создаёт user‑сессию Telethon (anon_news.session) для чтения каналов.
 - src/news_bot_part.py — модуль с функциями get_news(), summarize_news(), send_news() (используется scripts/run_daily.py).
 - src/get_channels.py — утилита для работы с каналами из папки Telegram.
 - mycron.txt — примеры записей crontab для обоих скриптов.
@@ -99,6 +100,11 @@ Clean News Bot — ежедневный дайджест из Telegram
   python scripts/get_users.py
   ```
 
+- Подготовить user‑сессию Telethon (нужна для чтения каналов):
+  ```bash
+  python scripts/create_user_session.py
+  ```
+
 - Прогнать агрегатор один раз (для проверки):
   ```bash
   python scripts/run_daily.py --send
@@ -109,8 +115,10 @@ Clean News Bot — ежедневный дайджест из Telegram
   python scripts/run_daily.py --channels    # Обновить channels.json
   python scripts/run_daily.py --news        # Только собрать новости (без отправки)
   python scripts/run_daily.py --send        # Полный цикл: каналы → новости → рассылка
+  python scripts/run_daily.py --weekly      # Сводка за неделю (вместо дня)
   python scripts/run_daily.py --dry-run     # Превью без отправки
-  python scripts/run_daily.py --summary-only  # Сохранить сводку в файл
+  python scripts/run_daily.py --summary-only  # Сохранить сводку в файл (summary.txt)
+  python scripts/run_daily.py --summary-only out.txt  # Сохранить сводку в указанный файл
   python scripts/run_daily.py --verify      # Проверить доступность подписчиков
   ```
 
@@ -181,6 +189,7 @@ Clean News Bot — ежедневный дайджест из Telegram
      - --verify — проверить доступность подписчиков перед рассылкой
      - --news — только собрать новости (без отправки)
      - --send — полный цикл: каналы → новости → суммаризация → рассылка
+     - --weekly — сводка за неделю (по умолчанию за день)
      - --dry-run — превью без реальной отправки
      - --summary-only — сохранить сводку в файл (по умолчанию summary.txt)
    - По умолчанию (без аргументов) выполняет --channels + --send
@@ -244,6 +253,8 @@ Clean News Bot — ежедневный дайджест из Telegram
 
 Диагностика
 - Telethon при первом запуске может запросить логин/код для создания сессии (anon_news.session).
+  - Создать сессию локально: `python scripts/create_user_session.py`
+  - Можно задать номер телефона через переменную окружения `TELEGRAM_PHONE`
   - Файл сессии нужно загрузить на сервер при деплое в облако (см. DEPLOY.md).
 - Если каналы не подтягиваются:
   - Проверьте соответствие FOLDER_NAME реальной папке с нужными каналами
