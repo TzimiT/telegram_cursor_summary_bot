@@ -1,5 +1,6 @@
 # Секреты/конфиги (оставь ТОЛЬКО локально!)
-config.py
+config.local.py
+config_secrets.py
 commands.txt
 subscribers.txt
 subscribers.json
