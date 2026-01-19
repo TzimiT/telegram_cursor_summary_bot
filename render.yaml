@@ -17,5 +17,7 @@ services:
         value: GPT
       - key: SUBSCRIBERS_FILE
         value: subscribers.json
+      - key: DATA_DIR
+        value: /data
       - key: DEBUG_MODE
         value: "False"

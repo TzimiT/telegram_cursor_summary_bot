@@ -12,9 +12,11 @@ if str(ROOT_DIR) not in sys.path:
 
 # Локальные настройки/секреты
 import config  # должен содержать telegram_bot_token
+from src.paths import DATA_DIR, resolve_data_path
 
 
-SUBSCRIBERS_FILE = ROOT_DIR / "subscribers.json"
+DEFAULT_SUBSCRIBERS_FILE = DATA_DIR / "subscribers.json"
+SUBSCRIBERS_FILE = resolve_data_path(getattr(config, "SUBSCRIBERS_FILE", DEFAULT_SUBSCRIBERS_FILE))
 
 
 def _load_subscribers():

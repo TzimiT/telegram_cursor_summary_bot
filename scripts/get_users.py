@@ -15,14 +15,13 @@ if str(ROOT_DIR) not in sys.path:
 
 
 import config
+from src.paths import DATA_DIR, resolve_data_path
 
-DEFAULT_SUBSCRIBERS_FILE = ROOT_DIR / "subscribers.json"
-SUBSCRIBERS_FILE = Path(getattr(config, 'SUBSCRIBERS_FILE', DEFAULT_SUBSCRIBERS_FILE))
-if not SUBSCRIBERS_FILE.is_absolute():
-    SUBSCRIBERS_FILE = ROOT_DIR / SUBSCRIBERS_FILE
-CHANNELS_FILE = ROOT_DIR / "channels.json"
-RECOMMENDATIONS_FILE = ROOT_DIR / "channel_recommendations.txt"
-USER_MESSAGES_LOG_FILE = ROOT_DIR / "user_messages.log"
+DEFAULT_SUBSCRIBERS_FILE = DATA_DIR / "subscribers.json"
+SUBSCRIBERS_FILE = resolve_data_path(getattr(config, 'SUBSCRIBERS_FILE', DEFAULT_SUBSCRIBERS_FILE))
+CHANNELS_FILE = DATA_DIR / "channels.json"
+RECOMMENDATIONS_FILE = DATA_DIR / "channel_recommendations.txt"
+USER_MESSAGES_LOG_FILE = DATA_DIR / "user_messages.log"
 RECOMMEND_WAIT_INPUT = 1
 
 logging.basicConfig(

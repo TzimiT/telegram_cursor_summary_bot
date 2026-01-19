@@ -17,14 +17,13 @@ if str(ROOT_DIR) not in sys.path:
 import config
 from src.get_channels import get_channels_fullinfo_from_folder, load_channels_from_json
 from src.news_bot_part import get_news, summarize_news, send_news
+from src.paths import DATA_DIR, resolve_data_path
 
 
-DEFAULT_SUBSCRIBERS_FILE = ROOT_DIR / "subscribers.json"
-SUBSCRIBERS_FILE = Path(getattr(config, 'SUBSCRIBERS_FILE', DEFAULT_SUBSCRIBERS_FILE))
-if not SUBSCRIBERS_FILE.is_absolute():
-    SUBSCRIBERS_FILE = ROOT_DIR / SUBSCRIBERS_FILE
+DEFAULT_SUBSCRIBERS_FILE = DATA_DIR / "subscribers.json"
+SUBSCRIBERS_FILE = resolve_data_path(getattr(config, 'SUBSCRIBERS_FILE', DEFAULT_SUBSCRIBERS_FILE))
 
-SUMMARIES_LOG_FILE = ROOT_DIR / "sent_summaries.log"
+SUMMARIES_LOG_FILE = DATA_DIR / "sent_summaries.log"
 
 
 def _backup_file(path: Path):
@@ -72,7 +71,7 @@ def save_summary_to_log(summary: str):
 
 
 def _ensure_telethon_session_file():
-    session_path = ROOT_DIR / "anon_news.session"
+    session_path = DATA_DIR / "anon_news.session"
     if session_path.exists():
         return session_path
 

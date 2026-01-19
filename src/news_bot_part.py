@@ -8,14 +8,16 @@ from telethon import TelegramClient
 from telegram import Bot
 from telegram.error import TelegramError, Forbidden, BadRequest
 
+import config
 from config import api_id, api_hash, telegram_bot_token, openai_api_key, FOLDER_NAME, DEBUG_MODE, DEBUG_USER_IDS
 from src.get_channels import get_channels_fullinfo_from_folder, load_channels_from_json
-from src.paths import ROOT_DIR
+from src.paths import DATA_DIR, resolve_data_path
 
 
-SUBSCRIBERS_FILE = ROOT_DIR / "subscribers.json"
-SENT_MESSAGES_LOG = ROOT_DIR / "sent_messages.log"
-SUMMARIES_LOG_FILE = ROOT_DIR / "sent_summaries.log"
+DEFAULT_SUBSCRIBERS_FILE = DATA_DIR / "subscribers.json"
+SUBSCRIBERS_FILE = resolve_data_path(getattr(config, "SUBSCRIBERS_FILE", DEFAULT_SUBSCRIBERS_FILE))
+SENT_MESSAGES_LOG = DATA_DIR / "sent_messages.log"
+SUMMARIES_LOG_FILE = DATA_DIR / "sent_summaries.log"
 TELEGRAM_MAX_MESSAGE_LENGTH = 4096
 
 
@@ -318,7 +320,7 @@ async def send_news(summary):
 
 
 async def main():
-    session_path = ROOT_DIR / "anon_news.session"
+    session_path = DATA_DIR / "anon_news.session"
     async with TelegramClient(str(session_path), api_id, api_hash) as client:
         # Шаг 1: Получить и сохранить полную инфу о каналах из папки
         await get_channels_fullinfo_from_folder(client, FOLDER_NAME)

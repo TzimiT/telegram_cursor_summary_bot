@@ -18,10 +18,11 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 import config
+from src.paths import DATA_DIR
 
 
 async def main():
-    session_path = ROOT_DIR / "anon_news.session"
+    session_path = DATA_DIR / "anon_news.session"
     print(f"[INFO] Создаю user session: {session_path}")
     print("[INFO] Использую API_ID/API_HASH из config.py или env")
     print("[INFO] Введите номер телефона и код из Telegram")

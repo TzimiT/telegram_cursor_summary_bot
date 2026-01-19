@@ -9,8 +9,12 @@ import sys
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
-SESSION_FILE = ROOT_DIR / "anon_news.session"
+from src.paths import DATA_DIR
+
+SESSION_FILE = DATA_DIR / "anon_news.session"
 
 
 def encode_session_to_base64():

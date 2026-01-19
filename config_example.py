@@ -5,6 +5,7 @@ telegram_bot_token = "DDD"
 FOLDER_NAME = "GPT"        # название папки Telegram
 TARGET_CHAT_ID = "EEE" # chat_id для отправки (канал или твой user_id)
 SUBSCRIBERS_FILE = "subscribers.json"
+DATA_DIR = "/data"  # базовая директория для файлов (volume)
 
 # Режим отладки: если True, отправка только тестовым пользователям из DEBUG_USER_IDS
 # Если False, отправка всем подписчикам

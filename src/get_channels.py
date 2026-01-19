@@ -2,10 +2,10 @@ import json
 
 from telethon.tl.functions.messages import GetDialogFiltersRequest
 
-from src.paths import ROOT_DIR
+from src.paths import DATA_DIR
 
 
-CHANNELS_FILE = ROOT_DIR / "channels.json"
+CHANNELS_FILE = DATA_DIR / "channels.json"
 
 
 def serialize_for_json(obj):

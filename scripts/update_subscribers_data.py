@@ -17,8 +17,10 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 import config
+from src.paths import DATA_DIR, resolve_data_path
 
-SUBSCRIBERS_FILE = ROOT_DIR / "subscribers.json"
+DEFAULT_SUBSCRIBERS_FILE = DATA_DIR / "subscribers.json"
+SUBSCRIBERS_FILE = resolve_data_path(getattr(config, "SUBSCRIBERS_FILE", DEFAULT_SUBSCRIBERS_FILE))
 
 
 def _load_subscribers():
@@ -117,7 +119,7 @@ async def update_subscribers_data():
 
     # Создаем Telethon клиент один раз для всех запросов
     telethon_available = False
-    session_path = ROOT_DIR / "anon_news.session"
+    session_path = DATA_DIR / "anon_news.session"
     try:
         client = TelegramClient(str(session_path), config.api_id, config.api_hash)
         await client.start()

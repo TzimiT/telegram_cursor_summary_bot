@@ -21,6 +21,7 @@
    - `OPENAI_API_KEY` - ключ OpenAI API
    - `FOLDER_NAME` - название папки Telegram (например, "GPT")
    - `SUBSCRIBERS_FILE` - subscribers.json
+   - `DATA_DIR` - путь к volume (например, `/data`)
    - `DEBUG_MODE` - False (для продакшена)
    - `DEBUG_USER_IDS` - можно оставить пустым
 
@@ -35,6 +36,11 @@
    - Создайте его локально: `python scripts/create_user_session.py`
    - Скопируйте `anon_news.session` на Railway как файл или через переменную окружения (base64)
    - Переменная окружения: `TELEGRAM_SESSION_B64` (также поддерживается `TELEGRAM_SESSION`)
+
+7. Подключите volume для постоянных данных:
+   - Railway → Settings → Volumes → Add Volume
+   - Mount path: `/data`
+   - Установите переменную окружения `DATA_DIR=/data`
 
 **Важно:** Railway предоставляет бесплатный тариф с ограничениями. Для продакшена может потребоваться платный план.
 
@@ -201,7 +207,8 @@ api_hash = os.getenv('API_HASH', 'YOUR_API_HASH')
 
 В облаке файловая система может быть эфемерной. Если `subscribers.json` и логи должны сохраняться между перезапусками:
 - используйте persistent disk (Render) или volume (Railway)
-- задайте `SUBSCRIBERS_FILE` на путь внутри volume
+- задайте `DATA_DIR` на путь внутри volume (например, `/data`)
+- при необходимости задайте `SUBSCRIBERS_FILE` как абсолютный путь
 
 ### Логирование
 

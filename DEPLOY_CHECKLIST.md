@@ -18,6 +18,7 @@
   - [ ] `OPENAI_API_KEY`
   - [ ] `FOLDER_NAME`
   - [ ] `DEBUG_MODE=False`
+- [ ] Подключили Volume (Railway) и установили `DATA_DIR=/data`
 - [ ] Загрузили файл `anon_news.session` (через CLI или как переменную)
 - [ ] Настроили Scheduled Task для ежедневной рассылки (cron: `0 9 * * *`, команда: `python scripts/run_daily.py --send`)
 - [ ] Проверили логи - бот должен быть запущен
