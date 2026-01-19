@@ -24,7 +24,7 @@
    - `DEBUG_MODE` - False (для продакшена)
    - `DEBUG_USER_IDS` - можно оставить пустым
 
-4. Railway автоматически определит, что нужно запустить `Procfile`
+4. Railway автоматически определит `Procfile` и запустит `python scripts/get_users.py`
 
 5. Для ежедневной рассылки настройте Scheduled Task:
    - В настройках проекта → New → Scheduled Task
@@ -32,8 +32,8 @@
    - Command: `python scripts/run_daily.py --send`
 
 6. Загрузите файл сессии Telethon:
-   - Скопируйте `anon_news.session` с локального компьютера
-   - В Railway добавьте его как файл или через переменную окружения (base64)
+   - Создайте его локально: `python scripts/create_user_session.py`
+   - Скопируйте `anon_news.session` на Railway как файл или через переменную окружения (base64)
    - Переменная окружения: `TELEGRAM_SESSION_B64` (также поддерживается `TELEGRAM_SESSION`)
 
 **Важно:** Railway предоставляет бесплатный тариф с ограничениями. Для продакшена может потребоваться платный план.
@@ -48,7 +48,7 @@
 
 1. Зарегистрируйтесь на [Render.com](https://render.com)
 
-2. Создайте новый Web Service:
+2. Создайте новый Background Worker (не Web Service):
    - Подключите GitHub репозиторий
    - Build Command: `pip install -r requirements.txt`
    - Start Command: `python scripts/get_users.py`
@@ -56,10 +56,11 @@
 3. Добавьте переменные окружения (Environment Variables):
    - Те же, что и для Railway
 
-4. Для ежедневной рассылки создайте отдельный Background Worker:
-   - New → Background Worker
-   - Start Command: `python scripts/run_daily.py --send`
-   - Или используйте Cron Job (платная функция)
+4. Для ежедневной рассылки используйте Cron Job (если доступно):
+   - New → Cron Job
+   - Schedule: `0 9 * * *`
+   - Command: `python scripts/run_daily.py --send`
+   - Если Cron Jobs недоступны на тарифе — используйте внешний планировщик
 
 5. Загрузите `anon_news.session` через SSH или как файл
    - Переменная окружения: `TELEGRAM_SESSION_B64` (также поддерживается `TELEGRAM_SESSION`)
@@ -80,7 +81,7 @@
    - Подключите GitHub репозиторий
    - Выберите Python
    - Build Command: `pip install -r requirements.txt`
-   - Run Command: `python scripts/get_users.py`
+   - Run Command: `python scripts/get_users.py` (Worker)
 
 3. Добавьте переменные окружения в настройках App
 
@@ -123,7 +124,7 @@
    pip install -r requirements.txt
    ```
 
-5. Создайте `config.py` с вашими данными
+5. Создайте `config.py` с вашими данными или задайте переменные окружения
 
 6. Настройте systemd для автозапуска бота:
    ```bash
@@ -180,13 +181,13 @@
 ### Файл сессии Telethon
 
 Telethon создает файл `anon_news.session` при первом запуске. Этот файл нужно:
-1. Создать локально (запустите `scripts/run_daily.py` один раз)
+1. Создать локально (`python scripts/create_user_session.py`)
 2. Загрузить на сервер/в облако
 3. Сохранить в рабочей директории проекта
 
 ### Переменные окружения vs config.py
 
-Для безопасности лучше использовать переменные окружения вместо `config.py` с секретами. Можно адаптировать `config.py` для чтения из переменных окружения:
+Для безопасности лучше использовать переменные окружения вместо `config.py` с секретами. В проекте уже есть поддержка `.env` и переменных окружения (см. `config.py`):
 
 ```python
 import os

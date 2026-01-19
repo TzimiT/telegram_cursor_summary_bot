@@ -121,6 +121,13 @@ async def verify_subscribers_delivery(bot: Bot):
     return ok
 
 
+def _parse_target_date(date_str: str):
+    try:
+        return datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError as e:
+        raise ValueError("Неверный формат даты. Используй YYYY-MM-DD.") from e
+
+
 async def run_pipeline(args):
     # 1) Создание клиентов
     bot_token = (config.telegram_bot_token or "").strip()
@@ -158,11 +165,18 @@ async def run_pipeline(args):
             channels = load_channels_from_json()
             if args.news or args.send:
                 # Определяем период: неделя или день
+                target_date = _parse_target_date(args.date) if args.date else None
                 period = 'week' if args.weekly else 'day'
-                period_name = "неделю" if args.weekly else "вчера"
+                if target_date:
+                    if args.weekly:
+                        period_name = f"неделю до {target_date.isoformat()}"
+                    else:
+                        period_name = target_date.isoformat()
+                else:
+                    period_name = "неделю" if args.weekly else "вчера"
 
                 print(f"[LOG] Каналы для агрегации: {[ch.get('username','?') for ch in channels]}")
-                news = await get_news(client, channels, period=period)
+                news = await get_news(client, channels, period=period, target_date=target_date)
                 print(f"[LOG] Найдено новостей за {period_name}: {len(news)}")
                 if args.news and not args.send:
                     # Только сбор новостей
@@ -170,7 +184,7 @@ async def run_pipeline(args):
                 if not news:
                     print(f"[LOG] Нет новостей за {period_name} — рассылка пропущена")
                     return
-                summary = summarize_news(news, period=period)
+                summary = summarize_news(news, period=period, target_date=target_date)
 
                 if args.summary_only:
                     out = args.summary_only if isinstance(args.summary_only, str) else 'summary.txt'
@@ -202,6 +216,7 @@ def build_arg_parser():
     p.add_argument('--news', action='store_true', help='Только собрать новости (без отправки)')
     p.add_argument('--send', action='store_true', help='Собрать новости, суммаризировать и отправить')
     p.add_argument('--weekly', action='store_true', help='Собрать саммаризацию за неделю (по умолчанию за день)')
+    p.add_argument('--date', help='Собрать за указанную дату (UTC), формат YYYY-MM-DD')
     p.add_argument('--dry-run', action='store_true', help='Не отправлять, только показать превью')
     p.add_argument('--summary-only', nargs='?', const=True, help='Сохранить сводку в файл (по умолчанию summary.txt) и завершить')
     return p

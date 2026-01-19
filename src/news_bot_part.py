@@ -32,22 +32,25 @@ def load_subscribers():
         return []
 
 
-def get_yesterday_range():
-    today = datetime.now(timezone.utc).date()
-    start = datetime.combine(today - timedelta(days=1), datetime.min.time(), tzinfo=timezone.utc)
-    end = datetime.combine(today, datetime.min.time(), tzinfo=timezone.utc)
+def get_day_range(target_date=None):
+    if target_date is None:
+        today = datetime.now(timezone.utc).date()
+        target_date = today - timedelta(days=1)
+    start = datetime.combine(target_date, datetime.min.time(), tzinfo=timezone.utc)
+    end = start + timedelta(days=1)
     return start, end
 
 
-def get_week_range():
-    """Возвращает диапазон дат за последние 7 дней (включая сегодня)"""
+def get_week_range(target_date=None):
+    """Возвращает диапазон дат за последние 7 дней (до target_date включительно)"""
     today = datetime.now(timezone.utc).date()
-    start = datetime.combine(today - timedelta(days=7), datetime.min.time(), tzinfo=timezone.utc)
-    end = datetime.combine(today, datetime.min.time(), tzinfo=timezone.utc)
+    end_date = target_date or today
+    start = datetime.combine(end_date - timedelta(days=7), datetime.min.time(), tzinfo=timezone.utc)
+    end = datetime.combine(end_date, datetime.min.time(), tzinfo=timezone.utc)
     return start, end
 
 
-def summarize_news(news_list, period='day'):
+def summarize_news(news_list, period='day', target_date=None):
     """
     Суммаризирует новости за указанный период.
 
@@ -59,11 +62,11 @@ def summarize_news(news_list, period='day'):
 
     # Определяем диапазон дат в зависимости от периода
     if period == 'week':
-        start, end = get_week_range()
+        start, end = get_week_range(target_date=target_date)
         date_str = f"{start.strftime('%Y-%m-%d')} - {end.strftime('%Y-%m-%d')}"
         period_text = "неделю"
     else:
-        start, end = get_yesterday_range()
+        start, end = get_day_range(target_date=target_date)
         date_str = start.strftime("%Y-%m-%d")
         period_text = "день"
 
@@ -152,7 +155,7 @@ AI/ML
     return response.choices[0].message.content.strip()
 
 
-async def get_news(client, channels, period='day'):
+async def get_news(client, channels, period='day', target_date=None):
     """
     Собирает новости из каналов за указанный период.
 
@@ -163,10 +166,10 @@ async def get_news(client, channels, period='day'):
     """
     all_news = []
     if period == 'week':
-        start, end = get_week_range()
+        start, end = get_week_range(target_date=target_date)
         period_name = "неделю"
     else:
-        start, end = get_yesterday_range()
+        start, end = get_day_range(target_date=target_date)
         period_name = "день"
 
     print(f"[DEBUG] Диапазон фильтра за {period_name}: {start} ... {end}")
