@@ -31,6 +31,8 @@
    - В настройках проекта → New → Scheduled Task
    - Cron: `0 9 * * *` (каждый день в 09:00 UTC)
    - Command: `python scripts/run_daily.py --send`
+   - Для спортивной сводки используйте отдельную задачу:
+     - Command: `python scripts/run_daily.py --sport --send`
 
 6. Загрузите файл сессии Telethon:
    - Создайте его локально: `python scripts/create_user_session.py`
@@ -66,6 +68,8 @@
    - New → Cron Job
    - Schedule: `0 9 * * *`
    - Command: `python scripts/run_daily.py --send`
+   - Для спортивной сводки используйте отдельный Cron Job:
+     - Command: `python scripts/run_daily.py --sport --send`
    - Если Cron Jobs недоступны на тарифе — используйте внешний планировщик
 
 5. Загрузите `anon_news.session` через SSH или как файл
@@ -171,6 +175,10 @@
    Добавьте строку:
    ```
   0 9 * * * cd /opt/news_bot && /opt/news_bot/venv/bin/python scripts/run_daily.py --send >> /opt/news_bot/bot.log 2>&1
+   ```
+   Для спортивной сводки — отдельная строка (пример на 09:30):
+   ```
+  30 9 * * * cd /opt/news_bot && /opt/news_bot/venv/bin/python scripts/run_daily.py --sport --send >> /opt/news_bot/bot.log 2>&1
    ```
 
 9. Проверьте статус:

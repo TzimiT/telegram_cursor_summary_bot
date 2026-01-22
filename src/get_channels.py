@@ -26,7 +26,7 @@ def serialize_for_json(obj):
         return str(obj)
 
 
-async def get_channels_fullinfo_from_folder(client, folder_name):
+async def get_channels_fullinfo_from_folder(client, folder_name, output_path=None):
     filters_resp = await client(GetDialogFiltersRequest())
     filters = None
     for attr in ['results', 'filters', 'dialog_filters']:
@@ -66,7 +66,8 @@ async def get_channels_fullinfo_from_folder(client, folder_name):
                         print(f"[WARN] Не смог получить инфу для peer {peer}: {e}")
             break
 
-    with open(CHANNELS_FILE, "w", encoding="utf-8") as f:
+    target_path = output_path or CHANNELS_FILE
+    with open(target_path, "w", encoding="utf-8") as f:
         json.dump({"channels": result_channels}, f, ensure_ascii=False, indent=2)
 
     if not result_channels:
@@ -75,10 +76,11 @@ async def get_channels_fullinfo_from_folder(client, folder_name):
     return result_channels
 
 
-def load_channels_from_json():
-    if not CHANNELS_FILE.exists():
-        print(f"[WARN] Файл {CHANNELS_FILE} не найден.")
+def load_channels_from_json(path=None):
+    target_path = path or CHANNELS_FILE
+    if not target_path.exists():
+        print(f"[WARN] Файл {target_path} не найден.")
         return []
-    with open(CHANNELS_FILE, "r", encoding="utf-8") as f:
+    with open(target_path, "r", encoding="utf-8") as f:
         data = json.load(f)
         return data.get("channels", [])

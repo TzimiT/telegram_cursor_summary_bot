@@ -40,6 +40,7 @@ Clean News Bot — ежедневный дайджест из Telegram
 - scripts/run_daily.py — единый скрипт для ежедневной рассылки с аргументами командной строки.
 - src/news_bot_part.py — модуль с функциями агрегации и рассылки (Telethon + OpenAI).
 - channels.json — список каналов для агрегации (формируется/обновляется src/get_channels.py или scripts/run_daily.py --channels).
+- channels_sport.json — список каналов спорта (формируется scripts/run_daily.py --sport).
 - subscribers.json — список подписчиков в формате { "subscribers": [ { ... } ] }.
 - sent_messages.log — лог каждой отправленной части сообщения (время, user_id, message_id, длина, полный текст).
 - sent_summaries.log — лог полных саммари перед рассылкой (с датой и временем).
@@ -123,6 +124,19 @@ Clean News Bot — ежедневный дайджест из Telegram
   python scripts/run_daily.py --verify      # Проверить доступность подписчиков
   ```
 
+Агрегация спорта (папка Telegram "Sport", отдельный промпт и файл каналов):
+```bash
+python scripts/run_daily.py --sport                 # Полный цикл для спорта
+python scripts/run_daily.py --sport --channels      # Обновить channels_sport.json
+python scripts/run_daily.py --sport --news          # Собрать новости без отправки
+python scripts/run_daily.py --sport --send --dry-run  # Превью без отправки
+```
+
+Ручные параметры для спорта (если нужно):
+```bash
+python scripts/run_daily.py --folder Sport --prompt sport --channels-file channels_sport.json
+```
+
 Вариант B: по расписанию (cron)
 - См. mycron.txt. Пример (подставьте свои пути):
   ```bash
@@ -193,6 +207,10 @@ Clean News Bot — ежедневный дайджест из Telegram
      - --weekly — сводка за неделю (по умолчанию за день)
      - --dry-run — превью без реальной отправки
      - --summary-only — сохранить сводку в файл (по умолчанию summary.txt)
+    - --folder — название папки Telegram (filters)
+    - --channels-file — путь к json с каналами
+    - --prompt — шаблон промпта (general или sport)
+    - --sport — шорткат: папка Sport + промпт sport + channels_sport.json
    - По умолчанию (без аргументов) выполняет --channels + --send
    - Создает бэкапы файлов перед изменением
    - Сохраняет саммари в sent_summaries.log перед рассылкой

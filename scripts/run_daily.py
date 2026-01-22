@@ -127,6 +127,28 @@ def _parse_target_date(date_str: str):
         raise ValueError("Неверный формат даты. Используй YYYY-MM-DD.") from e
 
 
+def _resolve_channels_path(args):
+    if args.channels_file:
+        return resolve_data_path(args.channels_file)
+    if args.sport:
+        return resolve_data_path("channels_sport.json")
+    return None
+
+
+def _resolve_folder_name(args):
+    if args.sport:
+        return "Sport"
+    if args.folder:
+        return args.folder
+    return config.FOLDER_NAME
+
+
+def _resolve_prompt_type(args):
+    if args.sport:
+        return "sport"
+    return args.prompt
+
+
 async def run_pipeline(args):
     # 1) Создание клиентов
     bot_token = (config.telegram_bot_token or "").strip()
@@ -159,9 +181,11 @@ async def run_pipeline(args):
                     "Telethon сессия принадлежит боту. Нужна user session "
                     "(вход по телефону) в файле anon_news.session."
                 )
+            channels_path = _resolve_channels_path(args)
+            folder_name = _resolve_folder_name(args)
             if args.channels:
-                await get_channels_fullinfo_from_folder(client, config.FOLDER_NAME)
-            channels = load_channels_from_json()
+                await get_channels_fullinfo_from_folder(client, folder_name, output_path=channels_path)
+            channels = load_channels_from_json(path=channels_path)
             if args.news or args.send:
                 # Определяем период: неделя или день
                 target_date = _parse_target_date(args.date) if args.date else None
@@ -183,7 +207,8 @@ async def run_pipeline(args):
                 if not news:
                     print(f"[LOG] Нет новостей за {period_name} — рассылка пропущена")
                     return
-                summary = summarize_news(news, period=period, target_date=target_date)
+                prompt_type = _resolve_prompt_type(args)
+                summary = summarize_news(news, period=period, target_date=target_date, prompt_type=prompt_type)
 
                 if args.summary_only:
                     out = args.summary_only if isinstance(args.summary_only, str) else 'summary.txt'
@@ -218,6 +243,10 @@ def build_arg_parser():
     p.add_argument('--date', help='Собрать за указанную дату (UTC), формат YYYY-MM-DD')
     p.add_argument('--dry-run', action='store_true', help='Не отправлять, только показать превью')
     p.add_argument('--summary-only', nargs='?', const=True, help='Сохранить сводку в файл (по умолчанию summary.txt) и завершить')
+    p.add_argument('--folder', help='Название папки (filters) в Telegram для каналов')
+    p.add_argument('--channels-file', help='Путь к json с каналами (по умолчанию channels.json)')
+    p.add_argument('--prompt', choices=['general', 'sport'], default='general', help='Шаблон промпта для саммаризации')
+    p.add_argument('--sport', action='store_true', help='Шорткат: папка Sport + спорт-промпт')
     return p
 
 
